@@ -1,5 +1,3 @@
-# Frosty-kick
-Sla
 --[[
     frosty_kick.lua
     Simple Lua script: "Frosty Kick" - Kicks a player from the game (inspired by "Steal a Brainrot" games)
