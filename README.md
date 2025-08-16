@@ -1,82 +1,133 @@
+Fristy v2 -_-
 --[[
-    frosty_kick.lua
-    Simple Lua script: "Frosty Kick" - Kicks a player from the game (inspired by "Steal a Brainrot" games)
-    Not-so-advanced interface, for educational purposes.
+    "Frosty Kick" Roblox Lua Script
+    - Simple interface to kick a player by nickname
+    - UI can be moved around the screen
+    - For use in Roblox LocalScript (for testing/educational purposes)
+    - Inspired by "Steal a Brainrot" game
+    - Note: Only works if you have the power to kick (e.g., in your own game with admin privileges)
 ]]
 
--- Check if running in Roblox
+-- Check Roblox context
 if not game or not game.Players or not game.Players.LocalPlayer then
     print("Frosty Kick: This script must be run in a Roblox client (LocalScript).")
     return
 end
 
--- Services
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local StarterGui = game:GetService("StarterGui")
 
--- Create ScreenGui
+-- UI Creation
 local frostyGui = Instance.new("ScreenGui")
 frostyGui.Name = "FrostyKickGui"
 frostyGui.ResetOnSpawn = false
 frostyGui.Parent = Player:WaitForChild("PlayerGui")
 
--- Create main frame
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 120)
-frame.Position = UDim2.new(0.5, -125, 0.5, -60)
+frame.Size = UDim2.new(0, 290, 0, 160)
+frame.Position = UDim2.new(0.5, -145, 0.5, -80)
 frame.BackgroundColor3 = Color3.fromRGB(35, 45, 65)
 frame.BorderSizePixel = 0
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Active = true
+frame.Draggable = true -- Roblox deprecated this, see manual drag code below for universal support
 frame.Parent = frostyGui
 
--- Title label
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 40)
+title.Size = UDim2.new(1, 0, 0, 38)
 title.BackgroundTransparency = 1
 title.Text = "Frosty Kick"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 28
+title.TextSize = 26
 title.TextColor3 = Color3.fromRGB(160, 220, 255)
 title.Parent = frame
 
--- Info label
 local info = Instance.new("TextLabel")
-info.Size = UDim2.new(1, -20, 0, 30)
-info.Position = UDim2.new(0, 10, 0, 45)
+info.Size = UDim2.new(1, -20, 0, 22)
+info.Position = UDim2.new(0, 10, 0, 42)
 info.BackgroundTransparency = 1
-info.Text = "Press the button to expel yourself from the game."
+info.Text = "Enter the player's nickname to expel:"
 info.Font = Enum.Font.Gotham
 info.TextSize = 15
 info.TextColor3 = Color3.fromRGB(200, 220, 240)
 info.TextWrapped = true
 info.Parent = frame
 
+-- Nickname input
+local nicknameBox = Instance.new("TextBox")
+nicknameBox.Size = UDim2.new(0.8, 0, 0, 32)
+nicknameBox.Position = UDim2.new(0.1, 0, 0, 68)
+nicknameBox.BackgroundColor3 = Color3.fromRGB(245, 245, 255)
+nicknameBox.TextColor3 = Color3.fromRGB(30, 30, 40)
+nicknameBox.PlaceholderText = "PlayerNickname"
+nicknameBox.Font = Enum.Font.Gotham
+nicknameBox.TextSize = 18
+nicknameBox.Parent = frame
+
 -- Kick button
 local kickBtn = Instance.new("TextButton")
 kickBtn.Size = UDim2.new(0.7, 0, 0, 32)
-kickBtn.Position = UDim2.new(0.15, 0, 1, -42)
+kickBtn.Position = UDim2.new(0.15, 0, 1, -44)
 kickBtn.BackgroundColor3 = Color3.fromRGB(70, 50, 110)
 kickBtn.BorderSizePixel = 0
-kickBtn.Text = "Kick (Expel)"
+kickBtn.Text = "Kick"
 kickBtn.Font = Enum.Font.GothamBold
 kickBtn.TextSize = 20
 kickBtn.TextColor3 = Color3.fromRGB(255, 240, 255)
 kickBtn.Parent = frame
 
--- Button behavior
+-- Feedback label
+local feedback = Instance.new("TextLabel")
+feedback.Size = UDim2.new(1, -20, 0, 18)
+feedback.Position = UDim2.new(0, 10, 1, -22)
+feedback.BackgroundTransparency = 1
+feedback.Text = ""
+feedback.Font = Enum.Font.Gotham
+feedback.TextSize = 14
+feedback.TextColor3 = Color3.fromRGB(255, 120, 120)
+feedback.TextWrapped = true
+feedback.Parent = frame
+
+-- KICK LOGIC
 kickBtn.MouseButton1Click:Connect(function()
-    -- Optionally, show a notification before kicking
-    StarterGui:SetCore("SendNotification", {
-        Title = "Frosty Kick",
-        Text = "You have been expelled from the game.",
-        Duration = 2
-    })
-    wait(0.7)
-    Player:Kick("Frosty Kick: You have been expelled from the game.")
+    local nickname = nicknameBox.Text
+    if nickname == "" then
+        feedback.Text = "Enter a nickname!"
+        return
+    end
+    local target = nil
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if string.lower(plr.Name) == string.lower(nickname) or (plr.DisplayName and string.lower(plr.DisplayName) == string.lower(nickname)) then
+            target = plr
+            break
+        end
+    end
+    if not target then
+        feedback.Text = "Player not found!"
+        return
+    end
+    if target == Player then
+        feedback.Text = "You cannot kick yourself with this!"
+        return
+    end
+
+    -- Try to kick (only works if LocalPlayer has permissions, e.g. is server owner)
+    local success, err = pcall(function()
+        -- For LocalScript, we can't kick others unless we have remote server access (admin powers)
+        -- For demonstration: if you have access to a RemoteEvent for admin, fire it here.
+        -- Otherwise, show info:
+        target:Kick("Frosty Kick: You have been expelled from the game.")
+    end)
+    if success then
+        feedback.Text = "Player kicked!"
+    else
+        feedback.Text = "Kick failed (no permission?)"
+    end
 end)
 
--- Optional: Drag functionality
+-- Manual Drag Support (for universal compatibility)
+local UIS = game:GetService("UserInputService")
 local dragging, dragInput, dragStart, startPos
 frame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
