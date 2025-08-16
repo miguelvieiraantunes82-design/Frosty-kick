@@ -1,13 +1,3 @@
-Fristy v2 -_-
---[[
-    "Frosty Kick" Roblox Lua Script
-    - Simple interface to kick a player by nickname
-    - UI can be moved around the screen
-    - For use in Roblox LocalScript (for testing/educational purposes)
-    - Inspired by "Steal a Brainrot" game
-    - Note: Only works if you have the power to kick (e.g., in your own game with admin privileges)
-]]
-
 -- Check Roblox context
 if not game or not game.Players or not game.Players.LocalPlayer then
     print("Frosty Kick: This script must be run in a Roblox client (LocalScript).")
