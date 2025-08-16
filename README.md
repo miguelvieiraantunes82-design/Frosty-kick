@@ -2,10 +2,6 @@
     frosty_kick.lua
     Simple Lua script: "Frosty Kick" - Kicks a player from the game (inspired by "Steal a Brainrot" games)
     Not-so-advanced interface, for educational purposes.
-
-    How it works:
-    - When the script runs, it shows a basic interface with a "Kick" button.
-    - When the button is pressed, the local player is expelled from the game using :Kick().
 ]]
 
 -- Check if running in Roblox
